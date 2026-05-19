@@ -26,5 +26,8 @@ install_manifest.txt
 *.swp
 *~
 
+# Icon generator (output is committed, script is for reference)
+resources/gen_icon.py
+
 # Claude Code
 .claude/

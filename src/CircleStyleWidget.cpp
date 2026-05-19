@@ -75,9 +75,8 @@ QSize CircleStyleWidget::calcSize() const
     int w = sp + labelW + sp + maxBits * (s + sp) + hintW;
     int h = sp + rows.size() * rowH + sp;
 
-    // Extra space for date/time separator
-    bool hasDate = m_showDate && m_settings.yearMode != YearDisplayMode::Hidden;
-    if (hasDate) h += sp * 2 + 1;
+    // Extra space for date/time separator (any date row present)
+    if (m_showDate) h += sp * 2 + 1;
 
     return QSize(w, h);
 }

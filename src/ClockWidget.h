@@ -25,6 +25,7 @@ protected:
     void enterEvent(QEnterEvent* e) override;
     void leaveEvent(QEvent* e) override;
     void paintEvent(QPaintEvent* e) override;
+    void closeEvent(QCloseEvent* e) override;
 
 private slots:
     void onTick();

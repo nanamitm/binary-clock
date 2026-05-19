@@ -2,13 +2,11 @@
 
 Qt6/C++製のデスクトップアクセサリ型バイナリ時計です。
 
-![Binary Clock](docs/screenshot.png)
-
 ## 機能
 
 - **2種類の表示スタイル**
   - スタイルA: BCD グリッド（列ごとに各桁をバイナリ表示）
-  - スタイルC: 円形 LED（行ごとにバイナリ表示）
+  - スタイルB: ライン（行ごとにバイナリ表示）
 - **年月日表示**（ホバー時 / 常時 / クリック切替）
 - **10進数ヒント表示**（各桁・行に実際の数値を表示）
 - フレームレス・半透明ウィンドウ
@@ -26,11 +24,13 @@ Qt6/C++製のデスクトップアクセサリ型バイナリ時計です。
 
 ## ビルド要件
 
-- Qt 6.x（MinGW 64bit または MSVC 2022）
+- Qt 6.x
 - CMake 3.16+
-- Ninja（Qt同梱版で可）
+- Ninja
 
-## ビルド手順（Windows / MinGW）
+## ビルド手順
+
+### Windows (MinGW)
 
 1. `build.ps1` の `$qtPath` を自分の Qt インストールパスに合わせて編集
 2. PowerShell で実行:
@@ -46,16 +46,34 @@ Qt6/C++製のデスクトップアクセサリ型バイナリ時計です。
 .\build\BinaryClock.exe
 ```
 
+### Linux
+
+システムに Qt6 が入っている場合:
+
+```sh
+chmod +x build.sh
+./build.sh
+./build/BinaryClock
+```
+
+Qt6 をカスタムパスにインストールしている場合は `build.sh` の `QT_PATH` を設定してください。
+
+> **Note**  
+> 半透明表示にはコンポジットWMが必要です。  
+> Wayland 環境では常に最前面表示が効かない場合があります。
+
 ## ファイル構成
 
 ```
 src/
 ├── main.cpp
-├── ClockSettings.h       # 設定データ構造体
-├── ClockWidget.h/cpp     # メインウィンドウ
-├── GridStyleWidget.h/cpp # スタイルA: BCD グリッド
-├── CircleStyleWidget.h/cpp # スタイルC: 円形 LED
-└── SettingsDialog.h/cpp  # 設定ダイアログ
+├── ClockSettings.h         # 設定データ構造体
+├── ClockWidget.h/cpp       # メインウィンドウ
+├── GridStyleWidget.h/cpp   # スタイルA: BCD グリッド
+├── CircleStyleWidget.h/cpp # スタイルB: ライン
+└── SettingsDialog.h/cpp    # 設定ダイアログ
+resources/
+└── app.ico                 # アプリアイコン
 ```
 
 ## ライセンス

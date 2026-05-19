@@ -21,7 +21,7 @@ SettingsDialog::SettingsDialog(const ClockSettings& current, QWidget* parent)
     // Style
     m_styleCombo = new QComboBox;
     m_styleCombo->addItem(tr("A: グリッド"), 0);
-    m_styleCombo->addItem(tr("C: 円形"),     1);
+    m_styleCombo->addItem(tr("B: ライン"),    1);
     m_styleCombo->setCurrentIndex(m_settings.style == DisplayStyle::Grid ? 0 : 1);
     form->addRow(tr("スタイル:"), m_styleCombo);
 

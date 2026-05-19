@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QPainter>
 #include <QPainterPath>
+#include <QCloseEvent>
 
 ClockWidget::ClockWidget(QWidget* parent)
     : QWidget(parent)
@@ -35,8 +36,8 @@ ClockWidget::ClockWidget(QWidget* parent)
     connect(m_timer, &QTimer::timeout, this, &ClockWidget::onTick);
     m_timer->start(200);
 
-    applySettings(m_settings);
     loadPosition();
+    applySettings(m_settings);
     onTick();
 }
 
@@ -53,7 +54,7 @@ void ClockWidget::applySettings(const ClockSettings& s)
     m_circle->applySettings(s);
 
     m_stack->setCurrentIndex(s.style == DisplayStyle::Grid ? 0 : 1);
-    adjustSize();
+    updateChildVisibility();
     show();
 }
 
@@ -133,7 +134,7 @@ void ClockWidget::contextMenuEvent(QContextMenuEvent* e)
 
     auto* styleMenu = menu.addMenu(tr("スタイル"));
     auto* actGrid   = styleMenu->addAction(tr("A: グリッド"));
-    auto* actCircle = styleMenu->addAction(tr("C: 円形"));
+    auto* actCircle = styleMenu->addAction(tr("B: ライン"));
     actGrid->setCheckable(true);
     actCircle->setCheckable(true);
     actGrid->setChecked(m_settings.style == DisplayStyle::Grid);
@@ -162,12 +163,12 @@ void ClockWidget::contextMenuEvent(QContextMenuEvent* e)
     QAction* chosen = menu.exec(e->globalPos());
     if (!chosen) return;
 
-    if (chosen == actGrid)   { m_settings.style = DisplayStyle::Grid;   applySettings(m_settings); }
-    if (chosen == actCircle) { m_settings.style = DisplayStyle::Circle; applySettings(m_settings); }
-    if (chosen == actHover)   { m_settings.dateMode = DateDisplayMode::OnHover;   updateChildVisibility(); }
-    if (chosen == actAlways)  { m_settings.dateMode = DateDisplayMode::Always;    updateChildVisibility(); }
-    if (chosen == actOnClick) { m_settings.dateMode = DateDisplayMode::OnClick;   updateChildVisibility(); }
-    if (chosen == actDecimal) { m_settings.showDecimalHint = !m_settings.showDecimalHint; applySettings(m_settings); }
+    if (chosen == actGrid)    { m_settings.style = DisplayStyle::Grid;                       applySettings(m_settings); savePosition(); }
+    if (chosen == actCircle)  { m_settings.style = DisplayStyle::Circle;                     applySettings(m_settings); savePosition(); }
+    if (chosen == actHover)   { m_settings.dateMode = DateDisplayMode::OnHover;  m_showDate = false; updateChildVisibility(); savePosition(); }
+    if (chosen == actAlways)  { m_settings.dateMode = DateDisplayMode::Always;   m_showDate = false; updateChildVisibility(); savePosition(); }
+    if (chosen == actOnClick) { m_settings.dateMode = DateDisplayMode::OnClick;  m_showDate = false; updateChildVisibility(); savePosition(); }
+    if (chosen == actDecimal) { m_settings.showDecimalHint = !m_settings.showDecimalHint;   applySettings(m_settings); savePosition(); }
     if (chosen == actSettings) openSettings();
     if (chosen == actQuit) quit();
 }
@@ -175,25 +176,57 @@ void ClockWidget::contextMenuEvent(QContextMenuEvent* e)
 void ClockWidget::openSettings()
 {
     SettingsDialog dlg(m_settings, this);
-    if (dlg.exec() == QDialog::Accepted)
+    if (dlg.exec() == QDialog::Accepted) {
         applySettings(dlg.settings());
+        savePosition();
+    }
 }
 
 void ClockWidget::quit()
 {
+    close();
+}
+
+void ClockWidget::closeEvent(QCloseEvent* e)
+{
     savePosition();
-    QApplication::quit();
+    e->accept();
 }
 
 void ClockWidget::savePosition()
 {
     QSettings qs("BinaryClock", "BinaryClock");
     qs.setValue("pos", pos());
+
+    qs.setValue("style",           static_cast<int>(m_settings.style));
+    qs.setValue("dateMode",        static_cast<int>(m_settings.dateMode));
+    qs.setValue("yearMode",        static_cast<int>(m_settings.yearMode));
+    qs.setValue("ledOnColor",      m_settings.ledOnColor.name(QColor::HexArgb));
+    qs.setValue("ledOffColor",     m_settings.ledOffColor.name(QColor::HexArgb));
+    qs.setValue("bgColor",         m_settings.bgColor.name(QColor::HexArgb));
+    qs.setValue("ledSize",         m_settings.ledSize);
+    qs.setValue("opacity",         m_settings.opacity);
+    qs.setValue("alwaysOnTop",     m_settings.alwaysOnTop);
+    qs.setValue("showDecimalHint", m_settings.showDecimalHint);
 }
 
 void ClockWidget::loadPosition()
 {
     QSettings qs("BinaryClock", "BinaryClock");
+
     QPoint p = qs.value("pos", QPoint(-1, -1)).toPoint();
     if (p != QPoint(-1, -1)) move(p);
+
+    if (!qs.contains("style")) return;
+
+    m_settings.style    = static_cast<DisplayStyle>(qs.value("style").toInt());
+    m_settings.dateMode = static_cast<DateDisplayMode>(qs.value("dateMode").toInt());
+    m_settings.yearMode = static_cast<YearDisplayMode>(qs.value("yearMode").toInt());
+    m_settings.ledOnColor  = QColor(qs.value("ledOnColor").toString());
+    m_settings.ledOffColor = QColor(qs.value("ledOffColor").toString());
+    m_settings.bgColor     = QColor(qs.value("bgColor").toString());
+    m_settings.ledSize     = qs.value("ledSize").toInt();
+    m_settings.opacity     = qs.value("opacity").toDouble();
+    m_settings.alwaysOnTop     = qs.value("alwaysOnTop").toBool();
+    m_settings.showDecimalHint = qs.value("showDecimalHint").toBool();
 }

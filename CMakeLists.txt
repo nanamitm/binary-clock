@@ -8,6 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
+
 qt_add_executable(BinaryClock
     src/main.cpp
     src/ClockWidget.cpp
@@ -19,6 +20,11 @@ qt_add_executable(BinaryClock
     src/SettingsDialog.cpp
     src/SettingsDialog.h
     src/ClockSettings.h
+)
+
+qt_add_resources(BinaryClock "appres"
+    PREFIX "/"
+    FILES resources/app.ico
 )
 
 target_link_libraries(BinaryClock PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)

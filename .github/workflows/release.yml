@@ -44,7 +44,7 @@ jobs:
           Compress-Archive -Path "$dist/*" -DestinationPath "BinaryClock-win64.zip" -Force
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: BinaryClock-win64
           path: BinaryClock-win64.zip
@@ -130,7 +130,7 @@ jobs:
           mv "$appimage" "BinaryClock-${{ matrix.asset_suffix }}.AppImage"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: BinaryClock-${{ matrix.asset_suffix }}
           path: BinaryClock-${{ matrix.asset_suffix }}.AppImage
@@ -146,7 +146,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           path: release-assets
           merge-multiple: true
